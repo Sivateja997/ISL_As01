@@ -1,0 +1,107 @@
+---
+title: "Chapter - 3"
+output:
+  word_document: default
+  html_notebook: default
+  pdf_document: default
+---
+
+___Q8. sThis question involves the use of simple linear regression on the “Auto” data set.___
+
+a. Use the lm() function to perform a simple linear regression with “mpg” as the response and “horsepower” as the predictor. Use the summary() function to print the results. Comment on the output. For example :
+
+i. Is there a relationship between the predictor and the response ?
+```{r}
+library(ISLR)
+data(Auto)
+fit <- lm(mpg ~ horsepower, data = Auto)
+summary(fit)
+```
+We can find an answer to this question by putting the hypothesis H0:i=0 I to the test. The F-p-value statistic's is 7.03198910-81, indicating that there is clear evidence of a relationship between "mpg" and "horsepower."
+
+ii. How strong is the relationship between the predictor and the response ?
+
+We use the mean of the response and the RSE to calculate the residual error relative to the response. The average mpg is 23.4459184 miles per gallon. The lm. fit RSE was 4.9057569, indicating a percentage error of 20.9237141 percent. It's also worth noting that, with an R2 of 0.6059483, "horsepower" can explain nearly 60.5948258 percent of the variation in "mpg."
+
+iii. Is the relationship between the predictor and the response positive or negative ?
+
+Because the "horsepower" coeficient is negative, the relationship is also negative. The linear regression indicates that the more horsepower an automobile has, the lower the mpg fuel efficiency.
+
+iv. What is the predicted mpg associated with a “horsepower” of 98 ? What are the associated 95% confidence and prediction intervals ?
+
+```{r}
+predict(fit, data.frame(horsepower = 98), interval = "confidence")
+```
+```{r}
+predict(fit, data.frame(horsepower = 98), interval = "prediction")
+```
+
+b. Plot the response and the predictor. Use the abline() function to display the least squares regression line.
+```{r}
+plot(Auto$horsepower, Auto$mpg, main = "Scatterplot of mpg vs. horsepower", xlab = "horsepower", ylab = "mpg", col = "blue")
+abline(fit, col = "red")
+```
+c. Use the plot() function to produce diagnostic plots of the least squares regression fit. Comment on any problems you see with the fit.
+```{r}
+par(mfrow = c(2, 2))
+plot(fit)
+```
+The presence of non linearity in the data is indicated by the plot of residuals versus fitted values. The plot of standardized residuals vs. leverage reveals a few outliers (values greater than 2 or less than -2) as well as a few high leverage points.
+
+___Q9. This question involves the use of multiple linear regression on the “Auto” data set.___
+
+a. Produce a scatterplot matrix which include all the variables in the data set.
+
+```{r}
+pairs(Auto)
+```
+b. Compute the matrix of correlations between the variables using the function cor(). You will need to exclude the “name” variable, which is qualitative.
+```{r}
+names(Auto)
+```
+```{r}
+cor(Auto[1:8])
+```
+c. Use the lm() function to perform a multiple linear regression with “mpg” as the response and all other variables except “name” as the predictors. Use the summary() function to print the results. Comment on the output. For instance :
+
+i. Is there a relationship between the predictors and the response ?
+```{r}
+fit2 <- lm(mpg ~ . - name, data = Auto)
+summary(fit2)
+```
+ii. Which predictors appear to have a statistically significant relationship to the response ?
+
+This question can be answered by looking at the p-values associated with each predictor's t-statistic. Except for "cylinders," "horsepower," and "acceleration," we can conclude that all predictors are statistically significant.
+
+iii. What does the coefficient for the “year” variable suggest ?
+
+The coefficient of the "year" variable indicates that an increase of one year results in an increase of 0.7507727 in "mpg" (all other predictors remaining constant). In other words, cars improve their fuel efficiency by nearly 1 mpg per year.
+
+d. Use the plot() function to produce diagnostic plots of the linear regression fit. Comment on any problems you see with the fit. Do the residual plots suggest any unusually large outliers ? Does the leverage plots identify any observations with unusually high leverages ?
+
+```{r}
+par(mfrow = c(2, 2))
+plot(fit2)
+```
+The plot of residuals versus fitted values, as before, indicates that the data has mild non linearity. The plot of standardized residuals versus leverage reveals a few outliers (values greater than 2 or less than -2) as well as one high leverage point (point 14).
+
+e. Use the * and : symbols to fit linear regression models with interaction effects. Do any interactions appear to be statistically significant ?
+
+We took the two most highly correlated pairs from the correlation matrix and used them to select interaction effects.
+
+```{r}
+fit3 <- lm(mpg ~ cylinders * displacement+displacement * weight, data = Auto[, 1:8])
+summary(fit3)
+```
+The interaction between displacement and weight is statistically significant, but the interaction between cylinders and displacement is not, as shown by the p-values.
+
+f. Try a few different transformations of the variables, such as logX, X−−√, X2. Comment on your findings.
+```{r}
+par(mfrow = c(2, 2))
+plot(log(Auto$horsepower), Auto$mpg)
+plot(sqrt(Auto$horsepower), Auto$mpg)
+plot((Auto$horsepower)^2, Auto$mpg)
+```
+We're only looking at "horsepower" as a single predictor. The log transformation appears to produce the most linear plot.
+
+

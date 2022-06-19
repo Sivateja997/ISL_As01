@@ -1,0 +1,192 @@
+---
+title: "Chapter - 2"
+output:
+  pdf_document: default
+  html_notebook: default
+  word_document: default
+---
+
+__Q8. This exercise relates to the College data set, which can be found in the file College.csv on the book website. It contains a number of variables for 777 different universities and colleges in the US__
+
+(a) Use the read.csv() function to read the data into R. Call the loaded data “college”. Make sure that you have the directory set to the correct location for the data.
+```{r}
+college <- read.csv("College.csv")
+```
+(b) Look at the data using the fix() function. You should notice that the first column is just the name of each university. We don’t really want R to treat this as data. However, it may be handy to have these names for later.
+```{r}
+head(college[, 1:5])
+```
+```{r}
+rownames <- college[, 1]
+college <- college[, -1]
+head(college[, 1:5])
+```
+
+(c)
+i. Use the summary() function to produce a numerical summary of the variables in the data set.
+```{r}
+summary(college)
+```
+ii.Use the pairs() function to produce a scatterplot matrix of the first ten columns or variables of the data.
+```{r}
+college[,1] = as.numeric(factor(college[,1]))
+pairs(college[,1:10])
+```
+iii. Use the plot() function to produce side-by-side boxplots of “Outstate” versus “Private”.
+```{r}
+plot(college$Private, college$Outstate, xlab = "Private University", ylab ="Out of State tuition in USD", main = "Outstate Tuition Plot")
+```
+iv. Create a new qualitative variable, called “Elite”, by binning the “Top10perc” variable. Use the summary() function to see how many elite universities there are. Now use the plot() function to produce side-by-side boxplots of “Outstate” versus “Elite”.
+```{r}
+Elite <- rep("No", nrow(college))
+Elite[college$Top10perc > 50] <- "Yes"
+Elite <- as.factor(Elite)
+college$Elite <- Elite
+summary(college$Elite)
+```
+```{r}
+plot(college$Elite, college$Outstate, xlab = "Elite University", ylab ="Out of State tuition in USD", main = "Outstate Tuition Plot")
+```
+v. Use the hist() function to produce some histograms with numbers of bins for a few of the quantitative variables.
+```{r}
+par(mfrow = c(2,2))
+hist(college$Books, col = 2, xlab = "Books", ylab = "Count")
+hist(college$PhD, col = 3, xlab = "PhD", ylab = "Count")
+hist(college$Grad.Rate, col = 4, xlab = "Grad Rate", ylab = "Count")
+hist(college$perc.alumni, col = 6, xlab = "% alumni", ylab = "Count")
+```
+vi. Continue exploring the data, and provide a brief summary of what you discover.
+```{r}
+summary(college$PhD)
+```
+It is a little weird to have universities with 103% of faculty with Phd’s, let us see how many universities have this percentage and their names.
+```{r}
+weird.phd <- college[college$PhD == 103, ]
+nrow(weird.phd)
+```
+```{r}
+rownames[as.numeric(rownames(weird.phd))]
+```
+__Q9. This exercise involves the “Auto” data set studied in the lab. Make sure the missing values have been removed from the data.__
+
+a. Which of the predictors are quantitative, and which are qualitative ?
+```{r}
+auto <- read.csv("Auto.csv", na.strings = "?")
+auto <- na.omit(auto)
+str(auto)
+```
+b. What is the range of each quantitative predictor ?
+```{r}
+summary(auto[, -c(4, 9)])
+```
+c. What is the mean and standard deviation of each quantitative predictor ?
+```{r}
+sapply(auto[, -c(4, 9)], mean)
+```
+```{r}
+sapply(auto[, -c(4, 9)], sd)
+```
+d. Now remove the 10th through 85th observations. What is the range, mean, and standard deviation of each predictor in the subset of the data that remains ?
+```{r}
+subset <- auto[-c(10:85), -c(4,9)]
+sapply(subset, range)
+```
+```{r}
+sapply(subset, mean)
+```
+```{r}
+sapply(subset, sd)
+```
+e. Using the full data set, investigate the predictors graphically, using scatterplots or other tools of your choice. Create some plots highlighting the relationships among the predictors. Comment on your findings.
+```{r}
+auto$cylinders <- as.factor(auto$cylinders)
+auto$year <- as.factor(auto$year)
+auto$origin <- as.factor(auto$origin)
+pairs(auto[,1:7])
+```
+
+f. Suppose that we wish to predict gas mileage (“mpg”) on the basis of other variables. Do your plots suggest that any of the other variables might be useful in predicting “mpg” ?
+```{r}
+auto$horsepower <- as.numeric(auto$horsepower)
+cor(auto$weight, auto$horsepower)
+```
+```{r}
+cor(auto$weight, auto$displacement)
+```
+```{r}
+cor(auto$displacement, auto$horsepower)
+```
+___Q10. This exercise involves the “Boston” housing data set.___
+
+a. To begin, load in the “Boston” data set.
+```{r}
+library(MASS)
+Boston$chas <- as.factor(Boston$chas)
+nrow(Boston)
+```
+```{r}
+ncol(Boston)
+```
+b. Make some pairwise scatterplots of the predictors in this data set.
+```{r}
+par(mfrow = c(2, 2))
+plot(Boston$nox, Boston$crim)
+plot(Boston$rm, Boston$crim)
+plot(Boston$age, Boston$crim)
+plot(Boston$dis, Boston$crim)
+```
+c. Are any of the predictors associated with per capita crime rate ?
+```{r}
+hist(Boston$crim, breaks = 50)
+```
+Most suburbs do not have any crime (80% of data falls in crim < 20).
+```{r}
+pairs(Boston[Boston$crim < 20, ])
+```
+There may be a relationship between crim and nox, rm, age, dis, lstat and medv.
+
+d. Do any of the suburbs of Boston appear to have particularly high crime rates ? Tax rates ? Pupil-teacher ratios ?
+```{r}
+hist(Boston$crim, breaks = 50)
+```
+```{r}
+nrow(Boston[Boston$crim > 20, ])
+```
+```{r}
+hist(Boston$tax, breaks = 50)
+```
+```{r}
+nrow(Boston[Boston$tax == 666, ])
+```
+```{r}
+hist(Boston$ptratio, breaks = 50)
+```
+```{r}
+nrow(Boston[Boston$ptratio > 20, ])
+```
+e. How many of the suburbs in this data set bound the Charles river ?
+```{r}
+nrow(Boston[Boston$chas == 1, ])
+```
+f. What is the median pupil-teacher ratio among the towns in this data set ?
+```{r}
+median(Boston$ptratio)
+```
+g. Which suburb of Boston has lowest median value of owner-occupied homes ? What are the values of the other predictors for that suburb, and how do those values compare to the overall ranges for those predictors ?
+```{r}
+row.names(Boston[min(Boston$medv), ])
+```
+```{r}
+range(Boston$tax)
+```
+```{r}
+Boston[min(Boston$medv), ]$tax
+```
+h. In this data set, how many of the suburbs average more than seven rooms per dwelling ? More than eight rooms per dwelling ?
+```{r}
+nrow(Boston[Boston$rm > 7, ])
+```
+```{r}
+nrow(Boston[Boston$rm > 8, ])
+```
+
